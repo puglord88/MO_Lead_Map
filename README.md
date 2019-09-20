@@ -55,10 +55,10 @@ def getLeadLevelsForYear(year):
      return jsonify(data)
 Objectives and Findings
 
-Find counties with high risk of Blood Lead Levels (BLL) in kids under 6 years5 micrograms minimum risk level for poisoning
+1.Find counties with high risk of Blood Lead Levels (BLL) in kids under 6 years5 micrograms minimum risk level for poisoning
 
 
-Compare Missouri BLL to top 10 BLL states in US (2012-2017)
+2.Compare Missouri BLL to top 10 BLL states in US (2012-2017)
 
 
 
