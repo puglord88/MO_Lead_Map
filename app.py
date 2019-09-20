@@ -1,119 +1,97 @@
 from flask import Flask, render_template,redirect,jsonify
-from flask_pymongo import pymongo
+from flask_pymongo import PyMongo
 import sys
+import json
 
 app = Flask(__name__)
 
 # setup mongo connection
-myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-mydb = myclient["LeadDB"]
-AllStates = mydb["AllStates"]
-leadData = mydb["leadData"]
-minesData = mydb["minesData"]
+app.config["MONGO_URI"] = "mongodb://localhost:27017/LeadDB"
+mongo = PyMongo(app)
 
 # print(mongo.db.AllStates.find({"year":2017}).count())
 
 @app.route("/")
 def index():
     print("I am on index.html")
-   
     return render_template("index.html")
+
+@app.route("/airquality")
+def getAirQualityData():
+    geo_json_file=open("static/data/MO_2018_Air_Quality_Standards.geojson")
+    geo_json_data=(json.load(geo_json_file))
+    return jsonify(geo_json_data)
+   
+
+@app.route("/timelineMap")
+def getTimelineMap():
+    geo_json_file=open("static/data/MO_2018_County_Boundaries_with_air_in_lead_flag.geojson")
+    geo_json_data=(json.load(geo_json_file))
+    return jsonify(geo_json_data)
+
 
 @app.route("/years")
 def getAllYears():
     #Mongo query to get unique years from the document
-    data = mydb.AllStates.distinct('year')
-    #Filter(None,data) removes all empty strings
-    return jsonify(list(filter(None, data)))
-
-@app.route("/county")
-def getMinecounty():
-    #Mongo query to get unique years from the document
-    print("retrieving counties from mines")
-    data = mydb.minesData.distinct('county_name')
-    print(data)
+    data = mongo.db.AllStates.distinct('year')
     #Filter(None,data) removes all empty strings
     return jsonify(list(filter(None, data)))
 
 def getMongoData(query):
-     resp = mydb.AllStates.find(query, {'_id': False})
+     resp = mongo.db.AllStates.find(query, {'_id': False})
      data = []
      for doc in resp:
         data.append(doc)
      print("getmongodata",data)
      return data
 
-@app.route("/counties/year")
-def getAllcounties(year):
+@app.route("/counties/<year>")
+def getLeadDataByCounties(year):
+  try:
     query = { "year" : year }
-   # data = getMongoData(query)
-    countyLeadyears = mydb.leadData.find(query, {'_id': False})
-    #bllByStateData = mongo.db.AllStates.find(query, {'_id': False,"state":1,"PRCT_chldrn_confirbill_10ugdl":1}).limit(10)
+    # data = getMongoData(query)
+    county_lead_data = mongo.db.leadData.find(query, {'_id': False})
     data = []
-    for doc in countyLeadyears:
+   
+    for doc in county_lead_data:
         data.append(doc)
+        # print(data[0])
+    return jsonify(data)
+  except OSError:
+        print(OSError)
+         
+ 
+@app.route("/mines")
+def getActiveMines():
+    minesData= mongo.db.minesData.find({"mine_status":"Active"},{'_id': False})
+    return jsonify(list(minesData))
 
-@app.route("/mines/county")
-def getMineData(county_name):
-    query = { "county_name" : county_name  }
-   # data = getMongoData(query)
-    mineLead = mydb.minesData.find(query, {'_id': False})
-    #bllByStateData = mongo.db.AllStates.find(query, {'_id': False,"state":1,"PRCT_chldrn_confirbill_10ugdl":1}).limit(10)
-    data = []
-    for doc in mineLead:
-        data.append(doc)
+@app.route("/states/<year>")
+def getTopStates(year):
+    #find bll of missouri for a given year
 
-# @app.route("/mines/")
-# def getAllmines():
-#     #Mongo query to get unique years from the document
-#     data = mongo.db.minesData.distinct('mine_id')
-#     #Filter(None,data) removes all empty strings
-#     return jsonify(list(filter(None, data)))
+    missouri_lead_level_data = getMongoData({"state":"Missouri","year":year})
+    top_ten_lead_level_resp=mongo.db.AllStates.find({'state':{'$ne':"Missouri"},'year':year},\
+        {'_id':False}).sort([("prct_chldrn_confirbill_5ugdl",-1)]).limit(10)
     
-    # First sort all the docs by BLL 5mg
-
-# @app.route("/mines/<county>")
-# def getMinesdata():
-# #    MoData= mongo.db.AllStates.aggregate([
-#                 #      { $match: { "state": "Missouri" } }
-#                 #    ]);
-#     query = { "county" : "washington" }
-#     Minesdata = mongo.db.minesData.find(query, {'_id': False})
-#         # {"prct_chldrn_confirbill_5ugdl":{ "$gt": "3" }}
-#         # ,{"state":1,"prct_chldrn_confirbill_5ugdl":1,"PRCT_chldrn_confirbill_10ugdl":1},
-#         # {'_id': False}).limit(10)
-#     data = []
-#     for doc in Minesdata:
-#         data.append(doc)
-#     print(data)
+    combined_data = []
+    combined_data.append(missouri_lead_level_data[0])
+    #combined_data.append(top_ten_lead_level_data)
+    for doc in top_ten_lead_level_resp:
+        combined_data.append(doc)
     
-#     return jsonify(data)
-        
+    return jsonify(combined_data)
 
 @app.route("/years/<year>")
 def getLeadLevelsForYear(year):
     query = { "year" : year }
-   # data = getMongoData(query)
     bllByStateData = mongo.db.AllStates.find(query, {'_id': False})
-    #bllByStateData = mongo.db.AllStates.find(query, {'_id': False,"state":1,"PRCT_chldrn_confirbill_10ugdl":1}).limit(10)
+  
     data = []
     for doc in bllByStateData:
         data.append(doc)
     
     return jsonify(data)
-
-# @app.route("/year")
-# def getYear():
-#     print(" I am in get year Method")
-#     myquery={"prct_chldrn_confirbill_5ugdl":{ "$gt": "3" }}
-#     bllByStateData = mongo.db.AllStates.find(myquery, {'_id': False})
-#     #for yearData in bllByStateData.find({},{"year":1,"prct_chldrn_confirbill_5ugdl":1,"PRCT_chldrn_confirbill_10ugdl":1,"state":1}):
-    
-#     data = []
-#     for doc in bllByStateData:
-#         data.append(doc)
-    
-#     return jsonify(data)
 
 if __name__ == "__main__":
     app.run(debug=True)

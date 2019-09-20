@@ -1,0 +1,30 @@
+body {
+    padding: 0;
+    margin: 0;
+    background-color: #555
+  }
+ 
+  #map,
+  body,
+  html {
+    height: 100%;
+  }
+  
+  .legend {
+    line-height: 18px;
+    color: #555;
+  }
+  .legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+  }
+  .geojsonmap{
+    padding:15 px;
+  }
+  .h1, .h2, .h3, h1, h2, h3 {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
