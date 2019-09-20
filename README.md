@@ -71,3 +71,5 @@ Overall Results:
 St. Louis city, St louis County , Jackson and Buchanan Counties - High Count BLL
 In overall last 7 years Pennsylvania, New York and Ohio states show high number of kids affected by lead as compared to Missouri.
 Although more data is needed to truly say risky/dangerous blood lead levels found in children are related to counties where lead mines and poor lead air quality are present. It is highly suspicious that concentrations of lead and children with unhealthy blood lead level counts are present in the same regions.
+
+Collaboration by puglord88 and usn1485
