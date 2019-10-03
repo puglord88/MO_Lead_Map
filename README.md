@@ -7,7 +7,7 @@ Data Source: We collected Missouri Lead level Data in the CSV format from https:
 
 and The Missouri county boundaries from https://data-msdis.opendata.arcgis.com/datasets/mo-2018-county-boundaries?geometry=-114.488%2C32.027%2C-30.86%2C44.088&orderBy=DB2GSE_ST_
 
-Technologies Used Front End: JavaScript, HTML, CSS, Bootstrap, JavaScript Libraries: D3.js, GeoJson, Leaflet , Plotely
+Technologies Used Front End: JavaScript, HTML, CSS, Bootstrap, JavaScript Libraries: D3.js, GeoJson, Leaflet , Plotly
 
 Middle Layer: Python, Flask
 
